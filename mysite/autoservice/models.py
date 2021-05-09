@@ -32,7 +32,7 @@ class Car(models.Model):
 class OwnerCar(models.Model):
     year = models.IntegerField('Year', null=True)
     owner = models.ForeignKey(User, verbose_name="Owner", on_delete=models.SET_NULL, null=True, blank=True)
-    car = models.ForeignKey('Car', verbose_name="Model", on_delete=models.SET_NULL, null=True)
+    car = models.ForeignKey('Car', verbose_name="Car", on_delete=models.SET_NULL, null=True)
     licence_plate = models.CharField('Licence plate', max_length=200)
     vin_code = models.CharField('VIN code', max_length=200)
 
@@ -45,28 +45,28 @@ class OwnerCar(models.Model):
 
 
 class Order(models.Model):
-    owner_car = models.ForeignKey('OwnerCar', verbose_name="Model", on_delete=models.SET_NULL, null=True)
+    owner_car = models.ForeignKey('OwnerCar', verbose_name="Clients' car", on_delete=models.SET_NULL, null=True)
     due_date = models.DateTimeField('Due Date', null=True, blank=True)
 
     def __str__(self):
-        return f"{self.owner_car}: {self.owner_car.owner}, {self.due_date}"
+        return f"{self.owner_car}: {self.due_date}, {self.status}"
 
     class Meta:
         verbose_name = 'Order'
         verbose_name_plural = 'Orders'
 
     STATUS = (
-        ('d', 'Draft'),
-        ('i', 'In progress'),
-        ('d', 'Done'),
-        ('c', 'Canceled'),
+        ('draft', 'Draft'),
+        ('in progress', 'In progress'),
+        ('done', 'Done'),
+        ('canceled', 'Canceled'),
     )
 
     status = models.CharField(
-        max_length=1,
+        max_length=12,
         choices=STATUS,
         blank=True,
-        default='d',
+        default='draft',
         help_text='Status',
     )
 
