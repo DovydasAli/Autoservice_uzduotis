@@ -3,33 +3,39 @@ from django.http import HttpResponse
 from .models import Service, Order, OrderLine, Car, OwnerCar
 from django.shortcuts import render, get_object_or_404
 from django.views import generic
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 # Create your views here.
 
 def index(request):
-
     num_cars = Car.objects.all().count()
     num_orders = Order.objects.all().count()
     num_services = Service.objects.all().count()
 
     num_orders_done = Order.objects.filter(status__exact='done').count()
+    num_visits = request.session.get('num_visits', 1)
+    request.session['num_visits'] = num_visits + 1
 
     context = {
         'num_cars': num_cars,
         'num_orders': num_orders,
         'num_orders_done': num_orders_done,
         'num_services': num_services,
+        'num_visits': num_visits,
     }
 
     return render(request, 'index.html', context=context)
 
 
 def cars(request):
-    cars = OwnerCar.objects.all()
+    paginator = Paginator(OwnerCar.objects.all(), 2)
+    page_number = request.GET.get('page')
+    paged_cars = paginator.get_page(page_number)
     context = {
-        'cars': cars
+        'cars': paged_cars
     }
-    print(cars)
     return render(request, 'cars.html', context=context)
 
 def car(request, car_id):
@@ -39,8 +45,31 @@ def car(request, car_id):
 
 class OrderListView(generic.ListView):
     model = Order
+    paginate_by = 2
     template_name = 'order_list.html'
 
 class OrderDetailView(generic.DetailView):
     model = Order
     template_name = 'order_detail.html'
+
+
+class CarsInShopByUserListView(LoginRequiredMixin, generic.ListView):
+    model = Order
+    template_name = 'user_cars.html'
+    paginate_by = 10
+
+    def get_queryset(self):
+        return Order.objects.filter(owner_car__owner=self.request.user).filter\
+            (status__exact='in progress').order_by('due_date')
+
+
+def search(request):
+    """
+    paprasta paieška. query ima informaciją iš paieškos laukelio,
+    search_results prafiltruoja pagal įvestą tekstą knygų pavadinimus ir aprašymus.
+    Icontains nuo contains skiriasi tuo, kad icontains ignoruoja ar raidės
+    didžiosios/mažosios.
+    """
+    query = request.GET.get('query')
+    search_results = Order.objects.filter(Q(owner_car__owner__username__icontains=query) | Q(owner_car__car__model__icontains=query) | Q(owner_car__licence_plate__icontains=query) | Q(owner_car__vin_code__icontains=query))
+    return render(request, 'search.html', {'orders': search_results, 'query': query})

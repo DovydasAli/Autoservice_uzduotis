@@ -9,4 +9,9 @@
     <li><strong>Completed orders:</strong> {{ num_orders_done }}</li>
     <li><strong>Services:</strong> {{ num_services }}</li>
   </ul>
+{% if num_visits == 1 %}
+<p>This is your {{ num_visits }}-st time visiting our page, have a look around.</p>
+{% else %}
+<p>This is your {{ num_visits }} time visiting our page, welcome back!</p>
+{% endif %}
 {% endblock %}

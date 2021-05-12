@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from datetime import date
+from tinymce.models import HTMLField
 
 # Create your models here.
 
@@ -35,6 +37,8 @@ class OwnerCar(models.Model):
     car = models.ForeignKey('Car', verbose_name="Car", on_delete=models.SET_NULL, null=True)
     licence_plate = models.CharField('Licence plate', max_length=200)
     vin_code = models.CharField('VIN code', max_length=200)
+    description = HTMLField(null=True)
+    picture = models.ImageField('Car photo', upload_to='cars', null=True)
 
     def __str__(self):
         return f"{self.owner}: {self.car}, {self.licence_plate}, {self.vin_code}"
@@ -46,14 +50,7 @@ class OwnerCar(models.Model):
 
 class Order(models.Model):
     owner_car = models.ForeignKey('OwnerCar', verbose_name="Clients' car", on_delete=models.SET_NULL, null=True)
-    due_date = models.DateTimeField('Due Date', null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.owner_car}: {self.due_date}, {self.status}"
-
-    class Meta:
-        verbose_name = 'Order'
-        verbose_name_plural = 'Orders'
+    due_date = models.DateField('Due Date', null=True, blank=True)
 
     STATUS = (
         ('draft', 'Draft'),
@@ -69,6 +66,19 @@ class Order(models.Model):
         default='draft',
         help_text='Status',
     )
+
+    def __str__(self):
+        return f"{self.owner_car}: {self.due_date}, {self.status}"
+
+    class Meta:
+        verbose_name = 'Order'
+        verbose_name_plural = 'Orders'
+
+    @property
+    def is_overdue(self):
+        if self.due_date and date.today() > self.due_date:
+            return True
+        return False
 
 
 class OrderLine(models.Model):

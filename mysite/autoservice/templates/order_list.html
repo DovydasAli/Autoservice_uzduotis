@@ -1,16 +1,44 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <h1>Order list</h1>
-  {% if order_list %}
-  <ul>
-    {% for order in order_list %}
-      <li>
-        <a href="{{ order.id }}">{{ order.owner_car }}</a> - {{order.due_date}} <strong>({{order.status}})</strong>
-      </li>
-    {% endfor %}
-  </ul>
-  {% else %}
-    <p>No orders found.</p>
-  {% endif %}
+ {% load static %}
+    <h1>Car order list</h1></br>
+    {% if order_list %}
+    <div class="row">
+      {% for order in order_list %}
+        <div class="col-md-4 d-flex align-items-stretch">
+          <div class="card mb-4 shadow-sm">
+            {% if order.owner_car.picture %}
+              <img src="{{ order.owner_car.picture.url }}" class="card-img-top" alt="...">
+            {% else %}
+              <img src="{% static 'img/no-image.png' %}" class="card-img-top">
+            {% endif %}
+            <div class="card-body">
+              <h6 class="card-subtitle mb-2 text-muted"><a href="{{ order.id }}">{{ order.owner_car }}</a></h6>
+              <p class="card-text">{{ order.due_date }}</p>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    {% else %}
+      <p>No cars in our shop.</p>
+    {% endif %}
+<div class="pagination">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a href="?page=1">&laquo; first</a>
+            <a href="?page={{ page_obj.previous_page_number }}">back</a>
+        {% endif %}
+
+        <span class="current">
+            {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">next</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+        {% endif %}
+    </span>
+</div>
 {% endblock %}
