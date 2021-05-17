@@ -9,5 +9,6 @@
     <p><strong>Cars' year of manufacture:</strong> {{car.year}}</p>
     <p><strong>Cars' licence plate:</strong> {{car.licence_plate}}</p>
     <p><strong>Cars' VIN code:</strong> {{car.vin_code}}</p>
+    <p><strong>Notes:</strong> {{ car.description | safe }}</p>
     </div>
 {% endblock %}

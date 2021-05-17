@@ -6,6 +6,13 @@ from django.views import generic
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import redirect
+from django.contrib.auth.forms import User
+from django.views.decorators.csrf import csrf_protect
+from django.contrib import messages
+from django.shortcuts import render, get_object_or_404, reverse
+from .forms import OrderReviewForm
+from django.views.generic.edit import FormMixin
 
 # Create your views here.
 
@@ -48,9 +55,39 @@ class OrderListView(generic.ListView):
     paginate_by = 2
     template_name = 'order_list.html'
 
-class OrderDetailView(generic.DetailView):
+class OrderDetailView(FormMixin, generic.DetailView):
     model = Order
     template_name = 'order_detail.html'
+    form_class = OrderReviewForm
+
+    class Meta:
+        ordering = ['title']
+
+    # nurodome, kur atsidursime komentaro sėkmės atveju.
+    def get_success_url(self):
+        return reverse('order-detail', kwargs={'pk': self.object.id})
+
+    # įtraukiame formą į kontekstą, inicijuojame pradinę 'book' reikšmę.
+    def get_context_data(self, *args, **kwargs):
+        context = super(OrderDetailView, self).get_context_data(**kwargs)
+        context['form'] = OrderReviewForm(initial={'order': self.object})
+        return context
+
+    # standartinis post metodo perrašymas, naudojant FormMixin, galite kopijuoti tiesiai į savo projektą.
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    # štai čia nurodome, kad knyga bus būtent ta, po kuria komentuojame, o vartotojas bus tas, kuris yra prisijungęs.
+    def form_valid(self, form):
+        form.instance.order = self.object
+        form.instance.reviewer = self.request.user
+        form.save()
+        return super(OrderDetailView, self).form_valid(form)
 
 
 class CarsInShopByUserListView(LoginRequiredMixin, generic.ListView):
@@ -59,8 +96,7 @@ class CarsInShopByUserListView(LoginRequiredMixin, generic.ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        return Order.objects.filter(owner_car__owner=self.request.user).filter\
-            (status__exact='in progress').order_by('due_date')
+        return Order.objects.filter(owner_car__owner=self.request.user).order_by('due_date')
 
 
 def search(request):
@@ -73,3 +109,30 @@ def search(request):
     query = request.GET.get('query')
     search_results = Order.objects.filter(Q(owner_car__owner__username__icontains=query) | Q(owner_car__car__model__icontains=query) | Q(owner_car__licence_plate__icontains=query) | Q(owner_car__vin_code__icontains=query))
     return render(request, 'search.html', {'orders': search_results, 'query': query})
+
+@csrf_protect
+def register(request):
+    if request.method == "POST":
+        # pasiimame reikšmes iš registracijos formos
+        username = request.POST['username']
+        email = request.POST['email']
+        password = request.POST['password']
+        password2 = request.POST['password2']
+        # tikriname, ar sutampa slaptažodžiai
+        if password == password2:
+            # tikriname, ar neužimtas username
+            if User.objects.filter(username=username).exists():
+                messages.error(request, f'Username {username} already taken!')
+                return redirect('register')
+            else:
+                # tikriname, ar nėra tokio pat email
+                if User.objects.filter(email=email).exists():
+                    messages.error(request, f'User with {email} has already been registered!')
+                    return redirect('register')
+                else:
+                    # jeigu viskas tvarkoje, sukuriame naują vartotoją
+                    User.objects.create_user(username=username, email=email, password=password)
+        else:
+            messages.error(request, 'Passwords must match!')
+            return redirect('register')
+    return render(request, 'register.html')

@@ -37,7 +37,7 @@ class OwnerCar(models.Model):
     car = models.ForeignKey('Car', verbose_name="Car", on_delete=models.SET_NULL, null=True)
     licence_plate = models.CharField('Licence plate', max_length=200)
     vin_code = models.CharField('VIN code', max_length=200)
-    description = HTMLField(null=True)
+    description = HTMLField(null=True, blank=True)
     picture = models.ImageField('Car photo', upload_to='cars', null=True)
 
     def __str__(self):
@@ -80,12 +80,34 @@ class Order(models.Model):
             return True
         return False
 
+    @property
+    def total_cost(self):
+        order_line = OrderLine.objects.filter(order=self.id)
+        total = 0
+
+        for order in order_line:
+            cost = order.service.price * order.qty
+            total += cost
+        return total
+
+
 
 class OrderLine(models.Model):
     order = models.ForeignKey('Order', verbose_name="Order", on_delete=models.SET_NULL, null=True)
     service = models.ForeignKey('Service', verbose_name="Service", on_delete=models.SET_NULL, null=True)
     qty = models.IntegerField("Quantity")
 
+    @property
+    def total_cost(self):
+        return self.service.price * self.qty
+
     class Meta:
         verbose_name = 'Order Line'
         verbose_name_plural = 'Order Lines'
+
+
+class OrderReview(models.Model):
+    order = models.ForeignKey('Order', on_delete=models.SET_NULL, null=True, blank=True)
+    reviewer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    content = models.TextField('Comment', max_length=2000)
