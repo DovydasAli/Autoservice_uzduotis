@@ -13,6 +13,7 @@
             {% else %}
               <img src="{% static 'img/no-image.png' %}" class="card-img-top">
             {% endif %}
+              <img class="rounded-circle" src="{{order.owner_car.owner.profile.picture.url}}" width="100" height="100">
             <div class="card-body">
               <h6 class="card-subtitle mb-2 text-muted"><a href="{{ order.id }}">{{ order.owner_car }}</a></h6>
               <p class="card-text">{{ order.due_date }}</p>

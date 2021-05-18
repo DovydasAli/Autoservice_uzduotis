@@ -18,7 +18,7 @@
     <p><strong>Order:</strong>
       </br>
       {% for copy in order.orderline_set.all %}
-        <strong>Service:</strong> {{ copy.service.name }} <strong>Quantity:</strong> {{ copy.qty }} <strong>Price:</strong> {{ copy.service.price }} <strong>Cost:</strong> {{ copy.total_cost }}<br>
+        <strong>Service:</strong> {{ copy.service.name }} <strong>Quantity:</strong> {{ copy.qty }} <strong>Price:</strong> {{ copy.service.price }} <strong>Cost:</strong> {{ copy.service_cost }}<br>
       {% endfor %}</p>
       <strong>Total repair cost:</strong> {{ order.total_cost }}
       <hr>

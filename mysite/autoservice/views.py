@@ -1,7 +1,5 @@
-from django.shortcuts import render
 from django.http import HttpResponse
 from .models import Service, Order, OrderLine, Car, OwnerCar
-from django.shortcuts import render, get_object_or_404
 from django.views import generic
 from django.core.paginator import Paginator
 from django.db.models import Q
@@ -11,8 +9,9 @@ from django.contrib.auth.forms import User
 from django.views.decorators.csrf import csrf_protect
 from django.contrib import messages
 from django.shortcuts import render, get_object_or_404, reverse
-from .forms import OrderReviewForm
 from django.views.generic.edit import FormMixin
+from django.contrib.auth.decorators import login_required
+from .forms import OrderReviewForm, UserUpdateForm, ProfileUpdateForm
 
 # Create your views here.
 
@@ -37,7 +36,7 @@ def index(request):
 
 
 def cars(request):
-    paginator = Paginator(OwnerCar.objects.all(), 2)
+    paginator = Paginator(OwnerCar.objects.all(), 3)
     page_number = request.GET.get('page')
     paged_cars = paginator.get_page(page_number)
     context = {
@@ -52,7 +51,7 @@ def car(request, car_id):
 
 class OrderListView(generic.ListView):
     model = Order
-    paginate_by = 2
+    paginate_by = 3
     template_name = 'order_list.html'
 
 class OrderDetailView(FormMixin, generic.DetailView):
@@ -136,3 +135,23 @@ def register(request):
             messages.error(request, 'Passwords must match!')
             return redirect('register')
     return render(request, 'register.html')
+
+@login_required
+def profile(request):
+    if request.method == "POST":
+        u_form = UserUpdateForm(request.POST, instance=request.user)
+        p_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+        if u_form.is_valid() and p_form.is_valid():
+            u_form.save()
+            p_form.save()
+            messages.success(request, f"Profile updated")
+            return redirect('profile')
+    else:
+        u_form = UserUpdateForm(instance=request.user)
+        p_form = ProfileUpdateForm(instance=request.user.profile)
+
+    context = {
+        'u_form': u_form,
+        'p_form': p_form,
+    }
+    return render(request, 'profile.html', context)

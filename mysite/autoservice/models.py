@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from datetime import date
 from tinymce.models import HTMLField
+from PIL import Image
 
 # Create your models here.
 
@@ -41,7 +42,7 @@ class OwnerCar(models.Model):
     picture = models.ImageField('Car photo', upload_to='cars', null=True)
 
     def __str__(self):
-        return f"{self.owner}: {self.car}, {self.licence_plate}, {self.vin_code}"
+        return f"{self.owner}: {self.car}, {self.year}, {self.licence_plate}, {self.vin_code}"
 
     class Meta:
         verbose_name = 'Owner Car'
@@ -98,7 +99,7 @@ class OrderLine(models.Model):
     qty = models.IntegerField("Quantity")
 
     @property
-    def total_cost(self):
+    def service_cost(self):
         return self.service.price * self.qty
 
     class Meta:
@@ -111,3 +112,18 @@ class OrderReview(models.Model):
     reviewer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     date_created = models.DateTimeField(auto_now_add=True)
     content = models.TextField('Comment', max_length=2000)
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    picture = models.ImageField(default="default.png", upload_to="profile_pics")
+
+    def __str__(self):
+        return f"{self.user.username} profile"
+
+    def save(self):
+        super().save()
+        img = Image.open(self.picture.path)
+        if img.height > 300 or img.width > 300:
+            output_size = (300, 300)
+            img.thumbnail(output_size)
+            img.save(self.picture.path)
