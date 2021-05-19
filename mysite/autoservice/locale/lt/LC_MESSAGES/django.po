@@ -1,0 +1,219 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-05-18 12:48+0300\n"
+"PO-Revision-Date: 2021-05-18 12:49+0300\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: lt\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < "
+"11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? "
+"1 : n % 1 != 0 ? 2: 3);\n"
+"X-Generator: Poedit 2.4.3\n"
+
+#: .\models.py:12
+msgid "Name"
+msgstr "Vardas"
+
+#: .\models.py:13
+msgid "Price"
+msgstr "Kaina"
+
+#: .\models.py:19 .\models.py:99
+msgid "Service"
+msgstr "Paslauga"
+
+#: .\models.py:20
+msgid "Services"
+msgstr "Paslaugos"
+
+#: .\models.py:24
+msgid "Manufacturer"
+msgstr "Gamintojas"
+
+#: .\models.py:25
+msgid "Model"
+msgstr "Modelis"
+
+#: .\models.py:26
+msgid "Engine"
+msgstr "Variklis"
+
+#: .\models.py:32 .\models.py:39
+msgid "Car"
+msgstr "Mašina"
+
+#: .\models.py:33
+msgid "Cars"
+msgstr "Mašinos"
+
+#: .\models.py:37
+msgid "Year"
+msgstr "Metai"
+
+#: .\models.py:38
+msgid "Owner"
+msgstr "Savininkas"
+
+#: .\models.py:40
+msgid "Licence plate"
+msgstr "Valstybinis numeris"
+
+#: .\models.py:41
+msgid "VIN code"
+msgstr "VIN kodas"
+
+#: .\models.py:43
+msgid "Car photo"
+msgstr "Mašinos nuotrauka"
+
+#: .\models.py:49
+msgid "Owner Car"
+msgstr "Savininko mašina"
+
+#: .\models.py:50
+msgid "Owners Cars"
+msgstr "Savininko mašinos"
+
+#: .\models.py:54
+msgid "Clients' car"
+msgstr "Kliento mašina"
+
+#: .\models.py:55
+msgid "Due Date"
+msgstr "Atlikimo terminas"
+
+#: .\models.py:58
+msgid "Draft"
+msgstr "Planuojama"
+
+#: .\models.py:59
+msgid "In progress"
+msgstr "Vyksta darbai"
+
+#: .\models.py:60
+msgid "Done"
+msgstr "Atlikta"
+
+#: .\models.py:61
+msgid "Canceled"
+msgstr "Atšaukta"
+
+#: .\models.py:76 .\models.py:98
+msgid "Order"
+msgstr "Užsakymas"
+
+#: .\models.py:77
+msgid "Orders"
+msgstr "Užsakymai"
+
+#: .\models.py:100
+msgid "Quantity"
+msgstr "Kiekis"
+
+#: .\models.py:107
+msgid "Order Line"
+msgstr "Užsakymo eilutė"
+
+#: .\models.py:108
+msgid "Order Lines"
+msgstr "Užsakymo eilutės"
+
+#: .\models.py:115
+msgid "Comment"
+msgstr "Komentaras"
+
+#: .\templates\base.html:21
+msgid "Search"
+msgstr "Ieškoti"
+
+#: .\templates\base.html:39
+msgid "Home"
+msgstr "Pradinis puslapis"
+
+#: .\templates\base.html:40
+msgid "All cars"
+msgstr "Visos mašinos"
+
+#: .\templates\base.html:41
+msgid "All orders"
+msgstr "Visi užsakymai"
+
+#: .\templates\base.html:51
+msgid "My orders"
+msgstr "Mano užsakymai"
+
+#: .\templates\base.html:52
+msgid "Logout"
+msgstr "Atsijungti"
+
+#: .\templates\base.html:54
+msgid "Sign in"
+msgstr "Prisijungti"
+
+#: .\templates\base.html:56
+msgid "Register"
+msgstr "Registruotis"
+
+#: .\templates\index.html:4
+msgid "The Best Auto Service"
+msgstr "Geriausias autoservisas"
+
+#: .\templates\index.html:5
+msgid "We currently have:"
+msgstr "Šiuo metu turime:"
+
+#: .\templates\index.html:7
+msgid "Cars:"
+msgstr "Mašinos:"
+
+#: .\templates\index.html:8
+msgid "Orders:"
+msgstr "Užsakymai:"
+
+#: .\templates\index.html:9
+msgid "Completed orders:"
+msgstr "Atlikti užsakymai:"
+
+#: .\templates\index.html:10
+msgid "Services:"
+msgstr "Paslaugos:"
+
+#: .\templates\index.html:13 .\templates\index.html:15
+msgid "This is your"
+msgstr "Tai yra jūsų"
+
+#: .\templates\index.html:13
+msgid "-st time visiting our page, have a look around."
+msgstr "kartas, apsilankius mūsų puslapyje, apsižvalgykite."
+
+#: .\templates\index.html:15
+msgid "time visiting our page, welcome back!"
+msgstr "kartas, apsilankius mūsų puslapyje, sveiki sugrįžę!"
+
+#: .\views.py:115
+#, python-brace-format
+msgid "Username {username} already taken!"
+msgstr "Vartotojo vardas {username} jau yra registruotas!"
+
+#: .\views.py:120
+#, python-brace-format
+msgid "User with {email} has already been registered!"
+msgstr "Vartotojas su {email} jau yra registruotas!"
+
+#: .\views.py:126
+msgid "Passwords must match!"
+msgstr "Slaptažodžiai nesutampa!"
+
+#: .\views.py:138
+msgid "Profile updated"
+msgstr "Profilis atnaujintas"

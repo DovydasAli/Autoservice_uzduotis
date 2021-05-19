@@ -12,6 +12,7 @@ from django.shortcuts import render, get_object_or_404, reverse
 from django.views.generic.edit import FormMixin
 from django.contrib.auth.decorators import login_required
 from .forms import OrderReviewForm, UserUpdateForm, ProfileUpdateForm
+from django.utils.translation import gettext as _
 
 # Create your views here.
 
@@ -62,17 +63,14 @@ class OrderDetailView(FormMixin, generic.DetailView):
     class Meta:
         ordering = ['title']
 
-    # nurodome, kur atsidursime komentaro sėkmės atveju.
     def get_success_url(self):
         return reverse('order-detail', kwargs={'pk': self.object.id})
 
-    # įtraukiame formą į kontekstą, inicijuojame pradinę 'book' reikšmę.
     def get_context_data(self, *args, **kwargs):
         context = super(OrderDetailView, self).get_context_data(**kwargs)
         context['form'] = OrderReviewForm(initial={'order': self.object})
         return context
 
-    # standartinis post metodo perrašymas, naudojant FormMixin, galite kopijuoti tiesiai į savo projektą.
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         form = self.get_form()
@@ -81,7 +79,6 @@ class OrderDetailView(FormMixin, generic.DetailView):
         else:
             return self.form_invalid(form)
 
-    # štai čia nurodome, kad knyga bus būtent ta, po kuria komentuojame, o vartotojas bus tas, kuris yra prisijungęs.
     def form_valid(self, form):
         form.instance.order = self.object
         form.instance.reviewer = self.request.user
@@ -99,12 +96,6 @@ class CarsInShopByUserListView(LoginRequiredMixin, generic.ListView):
 
 
 def search(request):
-    """
-    paprasta paieška. query ima informaciją iš paieškos laukelio,
-    search_results prafiltruoja pagal įvestą tekstą knygų pavadinimus ir aprašymus.
-    Icontains nuo contains skiriasi tuo, kad icontains ignoruoja ar raidės
-    didžiosios/mažosios.
-    """
     query = request.GET.get('query')
     search_results = Order.objects.filter(Q(owner_car__owner__username__icontains=query) | Q(owner_car__car__model__icontains=query) | Q(owner_car__licence_plate__icontains=query) | Q(owner_car__vin_code__icontains=query))
     return render(request, 'search.html', {'orders': search_results, 'query': query})
@@ -121,18 +112,18 @@ def register(request):
         if password == password2:
             # tikriname, ar neužimtas username
             if User.objects.filter(username=username).exists():
-                messages.error(request, f'Username {username} already taken!')
+                messages.error(request, _(f'Username {username} already taken!'))
                 return redirect('register')
             else:
                 # tikriname, ar nėra tokio pat email
                 if User.objects.filter(email=email).exists():
-                    messages.error(request, f'User with {email} has already been registered!')
+                    messages.error(request, _(f'User with {email} has already been registered!'))
                     return redirect('register')
                 else:
                     # jeigu viskas tvarkoje, sukuriame naują vartotoją
                     User.objects.create_user(username=username, email=email, password=password)
         else:
-            messages.error(request, 'Passwords must match!')
+            messages.error(request, _('Passwords must match!'))
             return redirect('register')
     return render(request, 'register.html')
 
@@ -144,7 +135,7 @@ def profile(request):
         if u_form.is_valid() and p_form.is_valid():
             u_form.save()
             p_form.save()
-            messages.success(request, f"Profile updated")
+            messages.success(request, _(f"Profile updated"))
             return redirect('profile')
     else:
         u_form = UserUpdateForm(instance=request.user)
