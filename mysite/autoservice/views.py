@@ -1,9 +1,16 @@
 from django.http import HttpResponse
 from .models import Service, Order, OrderLine, Car, OwnerCar
-from django.views import generic
+
+from django.views.generic import (
+    ListView,
+    DetailView,
+    CreateView,
+    UpdateView,
+    DeleteView,
+)
 from django.core.paginator import Paginator
 from django.db.models import Q
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import redirect
 from django.contrib.auth.forms import User
 from django.views.decorators.csrf import csrf_protect
@@ -50,12 +57,12 @@ def car(request, car_id):
     return render(request, 'car.html', {'car': single_car})
 
 
-class OrderListView(generic.ListView):
+class OrderListView(ListView):
     model = Order
     paginate_by = 3
     template_name = 'order_list.html'
 
-class OrderDetailView(FormMixin, generic.DetailView):
+class OrderDetailView(FormMixin, DetailView):
     model = Order
     template_name = 'order_detail.html'
     form_class = OrderReviewForm
@@ -86,7 +93,7 @@ class OrderDetailView(FormMixin, generic.DetailView):
         return super(OrderDetailView, self).form_valid(form)
 
 
-class CarsInShopByUserListView(LoginRequiredMixin, generic.ListView):
+class CarsInShopByUserListView(LoginRequiredMixin, ListView):
     model = Order
     template_name = 'user_cars.html'
     paginate_by = 10
@@ -100,6 +107,72 @@ def search(request):
     search_results = Order.objects.filter(Q(owner_car__owner__username__icontains=query) | Q(owner_car__car__model__icontains=query) | Q(owner_car__licence_plate__icontains=query) | Q(owner_car__vin_code__icontains=query))
     return render(request, 'search.html', {'orders': search_results, 'query': query})
 
+class CarsInShopByUserDetailView(LoginRequiredMixin,FormMixin, DetailView):
+    model = Order
+    context_object_name = 'order'
+    template_name = 'user_car.html'
+    form_class = OrderReviewForm
+
+    def get_success_url(self):
+        return reverse('my-order', kwargs={'pk': self.object.id})
+
+    # įtraukiame formą į kontekstą, inicijuojame pradinę 'book' reikšmę.
+    def get_context_data(self, *args, **kwargs):
+        context = super(CarsInShopByUserDetailView, self).get_context_data(**kwargs)
+        context['form'] = OrderReviewForm()
+        return context
+
+    # standartinis post metodo perrašymas, naudojant FormMixin, galite kopijuoti tiesiai į savo projektą.
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    # štai čia nurodome, kad knyga bus būtent ta, po kuria komentuojame, o vartotojas bus tas, kuris yra prisijungęs.
+    def form_valid(self, form):
+        form.instance.order = self.object
+        form.instance.reviewer = self.request.user
+        form.save()
+        return super(CarsInShopByUserDetailView, self).form_valid(form)
+
+class CarsInShopByUserCreateView(LoginRequiredMixin, CreateView):
+    model = Order
+    fields = ['owner_car', 'due_date']
+    success_url = "/autoservice/myorders/"
+    template_name = 'user_order_form.html'
+
+    def get_form(self, *args, **kwargs):
+        form = super(CarsInShopByUserCreateView, self).get_form(*args, **kwargs)
+        form.fields['owner_car'].queryset = OwnerCar.objects.filter(owner=self.request.user)
+        return form
+
+class CarsInShopByUserUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Order
+    fields = ['owner_car', 'due_date']
+    success_url = "/autoservice/myorders/"
+    template_name = 'user_order_form.html'
+
+    def get_form(self, *args, **kwargs):
+        form = super(CarsInShopByUserUpdateView, self).get_form(*args, **kwargs)
+        form.fields['owner_car'].queryset = OwnerCar.objects.filter(owner=self.request.user)
+        return form
+
+    def test_func(self):
+        order = self.get_object()
+        return self.request.user == order.owner_car.owner
+
+class CarsInShopByUserDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Order
+    success_url = "/autoservice/myorders/"
+    template_name = 'user_order_delete.html'
+
+    def test_func(self):
+        order = self.get_object()
+        return self.request.user == order.owner_car.owner
+
 @csrf_protect
 def register(request):
     if request.method == "POST":
@@ -112,7 +185,7 @@ def register(request):
         if password == password2:
             # tikriname, ar neužimtas username
             if User.objects.filter(username=username).exists():
-                messages.error(request, _(f'Username {username} already taken!'))
+                messages.error(request, _('Username %(username)s already taken!') % {'username': username})
                 return redirect('register')
             else:
                 # tikriname, ar nėra tokio pat email

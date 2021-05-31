@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.urls import reverse
 from datetime import date
 from tinymce.models import HTMLField
 from PIL import Image
@@ -92,6 +93,9 @@ class Order(models.Model):
             total += cost
         return total
 
+    def get_absolute_url(self):
+        """Nurodo konkretaus aprašymo galinį adresą"""
+        return reverse('order-detail', args=[str(self.id)])
 
 
 class OrderLine(models.Model):

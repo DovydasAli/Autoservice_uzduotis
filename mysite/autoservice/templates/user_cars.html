@@ -7,8 +7,9 @@
     <ul>
 
       {% for order in order_list %}
+      <img src="{{order.owner_car.picture.url}}" width="300" height="250">
       <li class="{% if order.is_overdue %}text-danger{% endif %}">
-        <a href="{% url 'order-detail' order.pk %}">{{order.owner_car.car}}</a> ({{ order.due_date }})
+        <a href="{% url 'my-order' order.pk %}">{{order.owner_car.car}}</a> ({{ order.due_date }})
       </li>
       {% endfor %}
     </ul>
